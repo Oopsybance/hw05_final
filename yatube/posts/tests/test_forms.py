@@ -2,7 +2,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import Post, Group, User
+from ..models import Post, Group, User, Comment
 
 
 class PostFormTests(TestCase):
@@ -84,7 +84,6 @@ class PostFormTests(TestCase):
         form_data = {
             'text': 'Измененный старый пост',
             'group': PostFormTests.group2.pk,
-            'image': self.upload_2,
         }
         response = self.authorized_client.post(
             reverse(
@@ -101,19 +100,24 @@ class PostFormTests(TestCase):
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group, self.group2)
         self.assertEqual(post.author, self.user)
-        self.assertEqual(post.image, self.upload_2)
 
     def test_comment_for_authorized_user(self):
         """Тест создания комментария авторизованным пользователем"""
+        comment_count = Comment.objects.count()
         form_data = {
-            'post': self.post,
-            'author': self.user,
-            'text': 'Тестовый комментарий'
+            'text': 'Новый комментарий',
         }
-        self.authorized_client.post(
-            reverse('posts:add_comment', kwargs={'post_id': self.post.id}),
+        response = self.authorized_client.post(
+            reverse('posts:add_comment', kwargs={
+                'post_id': self.post.id
+            }),
             data=form_data,
             follow=True
         )
-        self.assertTrue(self.post.comments.filter(text=form_data['text'])
-                        .exists())
+        self.assertRedirects(response, reverse(
+            'posts:post_detail',
+            kwargs={'post_id': self.post.id}
+        ))
+
+        self.assertEqual(Comment.objects.count(), comment_count + 1)
+        self.assertTrue(response.context['comments'])

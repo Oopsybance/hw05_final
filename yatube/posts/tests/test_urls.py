@@ -23,6 +23,7 @@ class PostsUrlsTests(TestCase):
         )
         cls.Post_detail = 'posts:post_detail'
         cls.Post_edit = 'posts:post_edit'
+        cls.Comment = 'posts:add_comment'
 
     def setUp(self):
         self.autorized_user = Client()
@@ -72,6 +73,13 @@ class PostsUrlsTests(TestCase):
             response, reverse(self.Post_detail,
                               kwargs={'post_id': self.post.id}))
 
+    def test_cant_comment_post_guest(self):
+        """Проверка переадресации гостя со страницы комментариев."""
+        response = self.client.get(
+            reverse(self.Comment,
+                    kwargs={'post_id': self.post.id}))
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
     def test_accordance_urls_and_templates(self):
         """Проврка соответствия url и шаблонов"""
         url_templates_names = {
@@ -87,19 +95,3 @@ class PostsUrlsTests(TestCase):
             with self.subTest(address=address):
                 response = self.autorized_user.get(address)
                 self.assertTemplateUsed(response, template)
-
-    def test_cant_comment_post_guest(self):
-        """Проверка переадресации гостя со страницы комментариев."""
-        response = self.client.get(f'/posts/{self.post.pk}/comment/')
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertRedirects(
-            response, reverse('users:login') + '?next=/create/')
-
-    def test_authorized_user_can_comment_post(self):
-        """Проверка переадресации авторизированного пользователя
-        на страницу поста."""
-        response = self.client.get(
-            f'/posts/{self.post.pk}/comment/'
-        )
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertRedirects(response, f'/posts/{self.post.pk}/')

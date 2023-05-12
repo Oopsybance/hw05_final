@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
+{% load cache %}
+
 {% block title %}<title>Подписки</title>{% endblock %}
 {% block content %}
+  {% load cache %}
+  {% cache 20 follow_page %}
   <div class="container py-5">
     <h3>Подписки:</h3>
     {% include 'posts/includes/switcher.html' %}
@@ -8,6 +12,7 @@
       {% include 'posts/includes/article.html' %}
       {% if not forloop.last %}<hr>{% endif %}
     {% endfor %}
-    {% include 'posts/includes/paginator.html' %}
+    {% endcache %}
+    {% include 'posts/includes/paginator.html' %} 
   </div>
 {% endblock %}

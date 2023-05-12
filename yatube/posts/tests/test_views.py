@@ -154,31 +154,7 @@ class PostPagesTests(TestCase):
                 page_obj = response.context.get('page_obj')
                 self.assertEqual(page_obj[0], post_new)
 
-    def test_auth_user_can_follow_author(self):
-        """Проверка подписки на автора."""
-        self.authorized_client.get(reverse(
-            'posts:profile_follow', kwargs={'username': self.user2}))
-        following = Follow.objects.filter(user=self.user, author=self.user2)
-        self.assertTrue(following)
-        self.authorized_client.get(reverse(
-            'posts:profile_unfollow', kwargs={'username': self.user2}))
-        unfollowing = Follow.objects.filter(user=self.user, author=self.user2)
-        self.assertFalse(unfollowing)
-
-    def test_posts_cache(self) -> None:
-        """
-        Проверки, которые проверяют работу кеша главной страницы(index).
-        """
-        response = self.client.get(reverse('posts:index'))
-        content = response.content
-        Post.objects.filter(group=self.group).delete()
-        response = self.client.get(reverse('posts:index'))
-        self.assertEqual(content, response.content)
-        cache.clear()
-        response = self.client.get(reverse('posts:index'))
-        self.assertNotEqual(content, response.content)
-
-    def test_posts_detail_uses_correct_context_first_page(self) -> None:
+    def test_posts_detail_uses_correct_context_first_page(self):
         """Проверка изображения в context"""
         response = self.client.get(reverse(
             'posts:post_detail',
@@ -232,3 +208,109 @@ class PaginatorViewsTest(TestCase):
                 response = self.client.get(reverse_name)
                 self.assertEqual(len(response.context['page_obj']),
                                  TEST_SECOND_PAGE)
+
+
+class FollowTests(TestCase):
+    class FollowViewsTest(TestCase):
+        @classmethod
+        def setUpClass(cls):
+            super().setUpClass()
+            cls.user_following = User.objects.create(
+                username='user_following',
+            )
+            cls.user_follower = User.objects.create(
+                username='user_follower',
+            )
+            cls.post = Post.objects.create(
+                text='Подпишись на меня',
+                author=cls.user_following,
+            )
+
+        def setUp(self):
+            cache.clear()
+            self.authorized_client_follower = Client()
+            self.authorized_client_follower.force_login(self.user_follower)
+            self.authorized_client_following = Client()
+            self.authorized_client_following.force_login(self.user_following)
+
+        def test_post_profile_follow(self):
+            """Проверка подписки на пользователя."""
+            count_follow = Follow.objects.count()
+            self.authorized_client_follower.post(
+                reverse(
+                    'posts:profile_follow',
+                    kwargs={'username': self.user_follower}))
+            follow = Follow.objects.all().latest('id')
+            self.assertEqual(Follow.objects.count(), count_follow + 1)
+            self.assertEqual(follow.author_id, self.user_follower.id)
+            self.assertEqual(follow.user_id, self.user_following.id)
+
+        def test_post_profile_unfollow(self):
+            """Проверка отписки от пользователя."""
+            Follow.objects.create(
+                author=self.user_follower,
+                user=self.user_following
+            )
+            count_follow = Follow.objects.count()
+            self.authorized_client_follower.get(
+                reverse('posts:profile_unfollow',
+                        kwargs={'username': self.user_follower.username},
+                        )
+            )
+            self.assertEqual(Follow.objects.all().count(), count_follow - 1)
+
+        def test_post_follow_index_follower(self):
+            """Запись появляется в ленте подписчиков."""
+            Follow.objects.create(
+                user=self.user_follower,
+                author=self.user_following
+            )
+            response = self.authorized_client_follower.get('/follow/')
+            post_text_0 = response.context['page_obj'][0].text
+            self.assertEqual(post_text_0, 'Тестовая запись  для подписчиков')
+            response = self.authorized_client_following.get('/follow/')
+            self.assertNotEqual(response, 'Тестовая запись  для подписчиков')
+
+
+class CacheViewsTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user('post_author')
+        cls.group = Group.objects.create(
+            title='Название группы',
+            slug='slug',
+            description='Описание группы',
+        )
+        cls.post = Post.objects.create(
+            text='Текст',
+            author=cls.user,
+            group=cls.group,
+        )
+
+    def setUp(self):
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+        cache.clear()
+
+    def test_cache_index(self):
+        """Проверка хранения и очищения кэша для index."""
+        response = self.authorized_client.get(reverse('posts:index'))
+        posts = response.content
+        Post.objects.create(
+            text='New post',
+            author=self.user,
+        )
+        response_old = self.authorized_client.get(
+            reverse('posts:index')
+        )
+        old_posts = response_old.content
+        self.assertEqual(
+            old_posts,
+            posts,
+            'Не возвращает кэшированную страницу.'
+        )
+        cache.clear()
+        response_new = self.authorized_client.get(reverse('posts:index'))
+        new_posts = response_new.content
+        self.assertNotEqual(old_posts, new_posts, 'Нет сброса кэша.')
