@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}<title>Пару слов об авторе проекта</title>{% endblock %}
+{% block content %}
+<div class="container col-lg-9 col-sm-12">
+  <h3>Всем привет! Меня зовут Миша Пряничников - я разработчик-студент данного учебного проекта!</h3>
+  <br>
+  <p>
+    Грызу гранит науки IT-технологий и обучаюсь на курсе <b>Python-разработчик в ЯП</b>.<br>
+    <b>На фото  нарисованная собака</b>
+  <img src="{% static 'img/dog.jpg' %}" alt="My image" width="533" height="349">
+  </p>
+</div>
+{% endblock %}
