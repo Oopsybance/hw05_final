@@ -1,14 +1,21 @@
 {% extends 'base.html' %}
 {% load thumbnail %}
+
 {% load static %}
 {% block title %}{{ group.title }}{% endblock %}
 {% block content %}
+<main>
   <div>
     <h1>{{ group.title }}</h1>
     <p>{{ group.description }}</p>
     {% for post in posts %}
+
        {% include 'incledes/article.html' %}
+
     {% endfor %}
+
     {% include 'posts/includes/paginator.html' %}
+
   </div>
+</main>
 {% endblock %}

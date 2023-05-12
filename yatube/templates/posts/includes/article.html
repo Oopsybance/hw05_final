@@ -9,10 +9,10 @@
       Дата публикации: {{ post.pub_date|date:"d E Y" }}
     </li>
     {% if post.group and not without_group_links %}   
-    <li><p><b>Группа: </b><a href="{% url 'posts:group_list' post.group.slug %}">{{ post.group.title }}</a></p></li>
+    <li><p>Группа: <a href="{% url 'posts:group_list' post.group.slug %}">{{ post.group.title }}</a></p></li>
     {% endif %}
     </ul>
     <p>{{ post.text|linebreaks }}</p>
-  <a href="{% url 'posts:post_detail' post.pk %}">(подробная инфомация)</a>
+  <a href="{% url 'posts:post_detail' post.pk %}">Подробная инфомация</a>
 </article>
 {% if not forloop.last %}<hr>{% endif %}

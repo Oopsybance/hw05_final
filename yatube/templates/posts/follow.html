@@ -6,12 +6,18 @@
   {% cache 20 follow_page %}
   <div class="container py-5">
     <h3>Подписки:</h3>
+
     {% include 'posts/includes/switcher.html' %}
+
     {% for post in page_obj %}
+
       {% include 'posts/includes/article.html' %}
+
       {% if not forloop.last %}<hr>{% endif %}
     {% endfor %}
     {% endcache %}
-    {% include 'posts/includes/paginator.html' %} 
+
+    {% include 'posts/includes/paginator.html' %}
+
   </div>
 {% endblock %}
