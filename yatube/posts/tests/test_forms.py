@@ -56,7 +56,6 @@ class PostFormTests(TestCase):
 
     def test_create_post(self):
         """Проверка, создает ли форма пост в базе."""
-        post_count = Post.objects.count()
         posts = list(Post.objects.values_list('id', flat=True))
         form_data = {
             'text': 'Пост с написанным тестом',
