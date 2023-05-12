@@ -133,7 +133,7 @@ class PostPagesTests(TestCase):
         response_group = self.authorized_client.get(
             reverse('posts:group_list', kwargs={'slug': self.post.id})
         )
-        group = response_group.context
+        group = response_group.context[0]
         self.assertNotIn(post, group)
 
     def test_check_in_pages(self):
