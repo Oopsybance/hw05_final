@@ -1,6 +1,6 @@
 {% load thumbnail %}
 {% load static %}
-<article>
+<article style="border:2px solid #555; border-radius:20px ;box-shadow:3px 3px 5px #999; width:device-width; margin:20px; padding:20px;">
   <ul>
     <li>
       <b>Автор: </b>  <a href="{% url 'posts:profile' post.author.username %}">{{post.author.get_full_name|default:post.author.username}}</a>

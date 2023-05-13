@@ -1,9 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Технологии{% endblock %}
 {% block content %}
-<div class="container col-lg-9 col-sm-12"> 
-  <div class="row">
-    <h3>Походу, что я ничего не умею</h3>
-  </div>
-</div>
+{% load static %}
+<div class="row">
+  <h1>Чем я пользовался при создании этого проекта</h1>
+  <aside class="col-12 col-md-3">
+    <ul class="list-group list-group-flush">
+      <center>
+      <li class="list-group-item">
+        <img src="{% static 'img/python.png' %}" width="50" height="50" class="d-inline-block align-top">
+      </li>
+      <li class="list-group-item">
+        <img src="{% static 'img/django.png' %}" width="50" height="50" class="d-inline-block align-top">
+      </li>
+      <li class="list-group-item">
+        <img src="{% static 'img/html.png' %}" width="50" height="50" class="d-inline-block align-top">
+      </li>
+      </li>
+      <li class="list-group-item">
+        <img src="{% static 'img/bootstrap.png' %}" width="50" height="50" class="d-inline-block align-top">
+      </li>
+      </li>
+      <li class="list-group-item">
+        <img src="{% static 'img/database.png' %}" width="50" height="50" class="d-inline-block align-top">
+      </li>
+    </cente> 
+    </ul>
+  </aside>
+  <article class="col-12 col-md-9">
+    <p>При разработке этого сайта были применены технологии: язык программирования Python, 
+      фреймворк для веб-приложени Django, HTML, Bootstrap, CSS</p>
+  </article>
+  </aside>
 {% endblock %}
