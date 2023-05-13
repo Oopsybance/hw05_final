@@ -9,20 +9,8 @@
           Войти на сайт
         </div>
         <div class="card-body">
-          {% if form.errors %}
-              {% for field in form %}
-                {% for error in field.errors %}            
-                  <div class="alert alert-danger">
-                    {{ error|escape }}
-                  </div>
-                {% endfor %}
-              {% endfor %}
-              {% for error in form.non_field_errors %}
-                <div class="alert alert-danger">
-                  {{ error|escape }}
-                </div>
-              {% endfor %}
-          {% endif %}
+
+          {% include 'includes/errors_form.html' %}
 
           <form method="post"
             {% if action_url %}
@@ -39,21 +27,9 @@
                 aria-required="false"
               {% endif %}
             >
-              <label for="{{ field.id_for_label }}">
-                {{ field.label }}
-                  {% if field.field.required %}
-                    <span class="required text-danger">*</span>
-                  {% endif %}
-              </label>
-              <div>
-              {{ field|addclass:'form-control' }}
-                {% if field.help_text %}
-                  <small id="{{ field.id_for_label }}-help" class="form-text text-muted">
-                    {{ field.help_text|safe }}
-                  </small>
-                {% endif %}
-              </div>
-            </div>
+
+            {% include 'includes/user_form.html' %}
+
           {% endfor %}
           <div class="col-md-6 offset-md-4">
             <button type="submit" class="btn btn-primary">
