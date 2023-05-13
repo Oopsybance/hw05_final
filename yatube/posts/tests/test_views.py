@@ -22,11 +22,6 @@ class PostPagesTests(TestCase):
             text='Тестовый пост',
             group=cls.group,
         )
-        cls.group_fake = Group.objects.create(
-            title='Фейковая группа',
-            slug='fake-slug',
-            description='Описание фейк группы',
-        )
 
     def setUp(self):
         self.authorized_client = Client()
