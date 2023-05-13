@@ -41,14 +41,10 @@ class Post(models.Model):
         help_text='Группа, к которой будет относиться пост',
     )
     image = models.ImageField(
-        blank=True,
+        'Картинка',
         upload_to='posts/',
-        verbose_name='Изображение',
-        help_text='Изображение для поста'
+        blank=True,
     )
-
-    def __str__(self):
-        return self.text[:15]
 
     class Meta:
         ordering = ['-pub_date']
@@ -96,3 +92,11 @@ class Follow(CreatedModel):
         on_delete=models.CASCADE,
         related_name='following'
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'user'],
+                name='unique_author_user'
+            )
+        ]

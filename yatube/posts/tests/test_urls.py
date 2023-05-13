@@ -63,7 +63,8 @@ class PostsUrlsTests(TestCase):
             'posts:post_create'),
             follow=True)
         self.assertRedirects(
-            response, reverse('users:login') + '?next=/create/')
+            response,
+            reverse('users:login') + '?next=' + reverse('posts:post_create'))
 
     def test_edit_by_not_author(self):
         """Проверка переадресации при попытке редактировать чужой пост"""

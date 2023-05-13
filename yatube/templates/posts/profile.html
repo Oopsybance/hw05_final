@@ -6,6 +6,7 @@
 {% block content %}
 <main>
   <div class=class="mb-5">
+    {% include 'posts/includes/user_card.html' %}
     {% if request.user != author and request.user.is_authenticated %}
       {% if following %}
       <a
@@ -25,12 +26,10 @@
     {% endif %}
 
     {% for post in page_obj %}
-
-     {% include 'posts/includes/article.html' %}
-
-     {% if not forloop.last %}
-     <hr />
-     {% endif %}
+      {% include 'posts/includes/article.html' %}
+      {% if not forloop.last %}
+    <hr />
+      {% endif %}
     {% endfor %}
 
     {% include 'posts/includes/paginator.html' %}

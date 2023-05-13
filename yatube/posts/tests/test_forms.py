@@ -1,5 +1,6 @@
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models.fields.files import FileField, ImageFieldFile
 from django.test import TestCase, Client
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from ..models import Post, Group, User, Comment
@@ -24,31 +25,6 @@ class PostFormTests(TestCase):
             text='Пост с текстом',
             group=cls.group,
         )
-        cls.small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x01\x00'
-            b'\x01\x00\x00\x00\x00\x21\xf9\x04'
-            b'\x01\x0a\x00\x01\x00\x2c\x00\x00'
-            b'\x00\x00\x01\x00\x01\x00\x00\x02'
-            b'\x02\x4c\x01\x00\x3b'
-        )
-        cls.uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=cls.small_gif,
-            content_type='image/gif'
-        )
-        cls.small_gif_2 = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
-        cls.upload_2 = SimpleUploadedFile(
-            name='small.gif_2',
-            content=cls.small_gif_2,
-            content_type='image/gif_2',
-        )
 
     def setUp(self):
         self.authorized_client = Client()
@@ -57,10 +33,23 @@ class PostFormTests(TestCase):
     def test_create_post(self):
         """Проверка, создает ли форма пост в базе."""
         posts = list(Post.objects.values_list('id', flat=True))
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
         form_data = {
             'text': 'Пост с написанным тестом',
             'group': PostFormTests.group.pk,
-            'image': self.uploaded
+            'image': uploaded,
         }
         response = self.authorized_client.post(
             reverse('posts:post_create'),
@@ -74,9 +63,15 @@ class PostFormTests(TestCase):
         expected_count = len(posts) + 1
         self.assertEqual(Post.objects.count(), expected_count)
         post_new = posts_update[0]
+        image = ImageFieldFile(
+            name='posts/small.gif',
+            instance=post_new,
+            field=FileField(),
+        )
         self.assertEqual(post_new.text, form_data['text'])
         self.assertEqual(post_new.author, PostFormTests.user)
         self.assertEqual(post_new.group, PostFormTests.group)
+        self.assertEqual(image.name, 'posts/' + uploaded.name)
 
     def test_edit_post(self):
         """Проверка, редактируется ли пост."""
@@ -102,21 +97,18 @@ class PostFormTests(TestCase):
 
     def test_comment_for_authorized_user(self):
         """Тест создания комментария авторизованным пользователем"""
-        comment_count = Comment.objects.count()
+        comments = list(Comment.objects.values_list('id', flat=True))
         form_data = {
-            'text': 'Новый комментарий',
+            'text': 'новый комментарий'
         }
-        response = self.authorized_client.post(
-            reverse('posts:add_comment', kwargs={
-                'post_id': self.post.id
-            }),
+        self.authorized_client.post(
+            reverse('posts:add_comment', kwargs={'post_id': self.post.pk}),
             data=form_data,
             follow=True
         )
-        self.assertRedirects(response, reverse(
-            'posts:post_detail',
-            kwargs={'post_id': self.post.id}
-        ))
-
-        self.assertEqual(Comment.objects.count(), comment_count + 1)
-        self.assertTrue(response.context['comments'])
+        comments_updade = Comment.objects.exclude(id__in=comments)
+        expected_count = len(comments) + 1
+        new_comment = comments_updade[0]
+        self.assertEqual(self.post.comments.count(), expected_count)
+        self.assertEqual(new_comment.text, form_data['text'])
+        self.assertEqual(new_comment.author, self.user)

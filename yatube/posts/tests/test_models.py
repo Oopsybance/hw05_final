@@ -20,13 +20,15 @@ class PostModelTest(TestCase):
             group=cls.group,
         )
 
-    def test_models_have_correct_object_names(self):
-        """У моделей корректно работает __str__."""
+    def test_models_and_group_str(self):
+        """У моделей Models и Group работает __str__."""
         post = PostModelTest.post
-        self.assertEqual(str(post), post.text[:MAX_SUMBOL])
-
-    def test_model_group_have_correct_object_names(self):
-        """У модели Group корректно работает __str__."""
-        post_group = PostModelTest.group
-        expected_object_name_group = post_group.title
-        self.assertEqual(expected_object_name_group, str(post_group))
+        group = PostModelTest.group
+        group_title = group.title
+        fields_str = {
+            self.post.text[:MAX_SUMBOL]: str(post),
+            group_title: str(group),
+        }
+        for field, str_ in fields_str.items():
+            with self.subTest(field=field):
+                self.assertEqual(field, str_)
