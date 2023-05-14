@@ -1,10 +1,8 @@
-import shutil
 from django import forms
 from django.test import Client, TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.core.cache import cache
-from django.core.paginator import Page
 
 from ..models import Post, Group, User, Follow
 from ..constants import POST_ON_PEGE, TEST_SECOND_PAGE
@@ -43,13 +41,10 @@ class PostPagesTests(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-    
-    def get_first_post_on_page(self, page_obj):
-        return page_obj[POST_ON_PEGE]
 
     def posts_check_all_fields(self, post):
         """Метод, проверяющий поля поста."""
-        with self.subTest(post=post): 
+        with self.subTest(post=post):
             self.assertEqual(post.id, self.post.id)
             self.assertEqual(post.text, self.post.text)
             self.assertEqual(post.author, self.post.author)
