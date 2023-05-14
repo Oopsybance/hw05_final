@@ -3,6 +3,7 @@ from django.test import Client, TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.core.cache import cache
+from django.core.paginator import Page
 
 from ..models import Post, Group, User, Follow
 from ..constants import POST_ON_PEGE, TEST_SECOND_PAGE
@@ -42,6 +43,9 @@ class PostPagesTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
+    def post_get_on_first_page(self, page_obj):
+        return page_obj[0]
+
     def posts_check_all_fields(self, post):
         """Метод, проверяющий поля поста."""
         with self.subTest(post=post):
@@ -74,25 +78,32 @@ class PostPagesTests(TestCase):
     def test_index_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
         response = self.authorized_client.get(reverse('posts:index'))
-        self.posts_check_all_fields(response.context['page_obj'][0])
+        page_obj = response.context.get('page_obj')
+        post = self.post_get_on_first_page(page_obj)
+        self.assertIsInstance(page_obj, Page)
+        self.posts_check_all_fields(post)
 
     def test_group_list_show_correct_context(self):
         """Шаблон group сформирован с правильным контекстом."""
         response = self.client.get(
             reverse('posts:group_list', kwargs={'slug': self.group.slug})
         )
-        expected = list(Post.objects.filter(
-            group_id=self.group.id)[:POST_ON_PEGE])
-        self.assertEqual(list(response.context['page_obj']), expected)
+        page_obj = response.context.get('page_obj')
+        post = self.post_get_on_first_page(page_obj)
+        self.assertIsInstance(page_obj, Page)
+        self.assertEqual(response.context.get('group'), self.group)
+        self.posts_check_all_fields(post)
 
     def test_profile_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
         response = self.client.get(
             reverse('posts:profile', kwargs={'username': self.user})
         )
-        expected = list(Post.objects.filter(
-            author_id=self.user.id)[:POST_ON_PEGE])
-        self.assertEqual(list(response.context['page_obj']), expected)
+        page_obj = response.context.get('page_obj', None)
+        post = self.post_get_on_first_page(page_obj)
+        self.assertIsInstance(page_obj, Page)
+        self.assertEqual(response.context.get('author'), self.user)
+        self.posts_check_all_fields(post)
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -159,13 +170,6 @@ class PostPagesTests(TestCase):
             with self.subTest(url=url):
                 page_obj = response.context.get('page_obj')
                 self.assertEqual(page_obj[0], post_new)
-
-    def test_posts_detail_uses_correct_context_first_page(self):
-        """Проверка изображения в context"""
-        response = self.client.get(reverse(
-            'posts:post_detail',
-            kwargs={'post_id': 1}))
-        self.assertIsNotNone(response.context['post'].image)
 
 
 class PaginatorViewsTest(TestCase):
@@ -255,8 +259,8 @@ class FollowTests(TestCase):
             follow_upd = Follow.objects.filter(
                 user=self.user, author=self.user_follow
             ).exists()
-            self.assertEqual(follow, False)
-            self.assertEqual(follow_upd, True)
+            self.assertFalse(follow)
+            self.assertTrue(follow_upd)
 
         def test_post_profile_unfollow(self):
             """Проверка отписки от пользователя."""
@@ -272,8 +276,8 @@ class FollowTests(TestCase):
             unfollow_upd = Follow.objects.filter(
                 user=self.user, author=self.user_unfollow
             ).exists()
-            self.assertEqual(unfollow, True)
-            self.assertEqual(unfollow_upd, False)
+            self.assertTrue(unfollow)
+            self.assertFalse(unfollow_upd)
 
         def test_follower_sees_following_author_posts(self):
             """Проверка наличия постов у подписчика."""

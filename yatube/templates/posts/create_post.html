@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
+
 {% block title %}
 {% if is_edit %}
-  <title>Редактировать пост</title>
+  Редактировать пост
 {% else %}
-<title>Новый пост</title>
+  Новый пост
 {% endif %}
 {% endblock %}
+
 {% block content %}
 <main>
   <div class="container py-5">

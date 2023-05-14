@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load thumbnail %}
 
-{% block title %}<title>Профайл пользователя {{ author.get_full_name }}</title>{% endblock %}
+{% block title %}
+  Профайл пользователя {{ author.get_full_name }}
+{% endblock %}
 
 {% block content %}
 <main>

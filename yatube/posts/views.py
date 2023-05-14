@@ -34,6 +34,11 @@ def profile(request, username):
         'author': author,
         'page_obj': page_obj,
     }
+    if request.user.is_authenticated:
+        following = Follow.objects.filter(
+            author=author, user=request.user
+        ).exists()
+        context['following'] = following
     return render(request, 'posts/profile.html', context)
 
 
@@ -56,7 +61,7 @@ def post_create(request):
         post = form.save(commit=False)
         post.author = request.user
         post.save()
-        return redirect('posts:profile', post.author)
+        return redirect('posts:profile', post.author.username)
     return render(
         request,
         'posts/create_post.html',

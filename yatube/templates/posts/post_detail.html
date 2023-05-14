@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load thumbnail %}
 
-{% block title %}<title>Пост {{ post.text|truncatechars:30 }}</title>{% endblock %}
+{% block title %}
+  Пост {{ post.text|truncatechars:30 }}
+{% endblock %}
 
 {% block content %}
 <main>

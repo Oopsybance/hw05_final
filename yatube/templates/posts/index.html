@@ -2,7 +2,7 @@
 {% load thumbnail %}
 
 {% block title %}
-<title>{{ title }}</title>
+  Последние обновления на сайте
 {% endblock %}
 
 {% block content %}
@@ -14,6 +14,7 @@
    <h1>Последние обновления на сайте</h1>
       {% for post in page_obj %}
       {% include 'posts/includes/article.html' %}
+      {% if not forloop.last %}<hr>{% endif %}
       {% endfor %}
   </div>
   {% endcache %}
