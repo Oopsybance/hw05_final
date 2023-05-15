@@ -21,4 +21,3 @@
     <a href="{% url 'posts:post_detail' post.pk %}">
       <img src="{% static 'img/chat.png' %}" width="25" height="25" > Комментарии </a></div>
 </article>
-{% if not forloop.last %}<hr>{% endif %}
