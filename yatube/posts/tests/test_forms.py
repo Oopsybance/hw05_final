@@ -1,7 +1,6 @@
 from django.test import TestCase, Client
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
-from django.db.models.fields.files import FileField, ImageFieldFile
 
 from ..models import Post, Group, User, Comment
 
@@ -96,11 +95,6 @@ class PostFormTests(TestCase):
         form_data = {
             'text': 'новый комментарий'
         }
-        response = self.authorized_client.post(
-            reverse('posts:add_comment', kwargs={'post_id': self.post.pk}),
-            data=form_data,
-            follow=True
-        )
         comments_updade = Comment.objects.exclude(id__in=comments)
         expected_count = len(comments) + 1
         new_comment = comments_updade[0]
