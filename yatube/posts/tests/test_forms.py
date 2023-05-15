@@ -73,7 +73,7 @@ class PostFormTests(TestCase):
             'text': 'Измененный старый пост',
             'group': PostFormTests.group2.pk,
         }
-        response = self.authorized_client.post(
+        self.authorized_client.post(
             reverse(
                 'posts:post_edit',
                 kwargs={'post_id': PostFormTests.post.pk}
