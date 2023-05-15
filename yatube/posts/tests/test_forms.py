@@ -95,6 +95,11 @@ class PostFormTests(TestCase):
         form_data = {
             'text': 'новый комментарий'
         }
+        self.authorized_client.post(
+            reverse('posts:add_comment', kwargs={'post_id': self.post.pk}),
+            data=form_data,
+            follow=True
+        )
         comments_updade = Comment.objects.exclude(id__in=comments)
         expected_count = len(comments) + 1
         new_comment = comments_updade[0]
