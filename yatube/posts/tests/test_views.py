@@ -104,6 +104,8 @@ class PostPagesTests(TestCase):
         self.assertIsInstance(page_obj, Page)
         self.assertEqual(response.context.get('author'), self.user)
         self.posts_check_all_fields(post)
+        following = response.context.get('following')
+        self.assertFalse(following)
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
