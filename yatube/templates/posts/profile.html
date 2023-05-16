@@ -8,7 +8,11 @@
 {% block content %}
 <main>
   <div class=class="mb-5">
-    {% include 'posts/includes/user_card.html' %}
+    <h3>Профиль автора {{ author.username }}</h3> 
+    <h4>Постов у автора: {{ author.posts.count }}</h4> 
+    <h4>Автор подписан на {{ author.follower.count }} человек.</h4> 
+    <h4>Подписчиков у автора: {{ author.following.count }} человек.</h4> 
+    <hr/>
     {% if request.user != author and request.user.is_authenticated %}
       {% if following %}
       <a

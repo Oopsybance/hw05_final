@@ -106,7 +106,7 @@ class PostFormTests(TestCase):
         self.assertEqual(self.post.comments.count(), expected_count)
         self.assertEqual(new_comment.text, form_data['text'])
         self.assertEqual(new_comment.author, self.user)
-        self.assertEqual(form_data['text'], new_comment.text)
+        self.assertEqual(new_comment.post, self.post)
 
     def test_new_comment_guests_client(self):
         """Гость не может добавлять комментарий."""
